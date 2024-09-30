@@ -1,24 +1,84 @@
-import { Router } from 'express';
-import * as RequestController from '../controllers/requestController';
+import { Router } from "express";
+import { body, param } from "express-validator";
+import * as RequestController from "../controllers/requestController";
+import { validate } from "../middleware/validationMiddleware";
 
 const router = Router();
 
-// Route to add a new room service request
-router.post('/requests', RequestController.addRequest);
+router.post(
+  "/requests",
+  [
+    body("guestName").isString().withMessage("Guest name must be a string"),
+    body("roomNumber")
+      .isInt({ min: 1 })
+      .withMessage("Room number must be a positive integer"),
+    body("requestDetails")
+      .isString()
+      .withMessage("Request details must be a string"),
+    body("priority")
+      .isInt({ min: 1 })
+      .withMessage("Priority must be a positive integer"),
+  ],
+  validate,
+  RequestController.addRequest
+);
 
-// Route to get all room service requests
-router.get('/requests', RequestController.getAllRequests);
+router.get("/requests", RequestController.getAllRequests);
 
-// Route to get a specific room service request by ID
-router.get('/requests/:id', RequestController.getRequestById);
+router.get(
+  "/requests/:id",
+  [param("id").isString()],
+  validate,
+  RequestController.getRequestById
+);
 
-// Route to update a room service request
-router.put('/requests/:id', RequestController.updateRequest);
+router.put(
+  "/requests/:id",
+  [
+    param("id").isString(),
+    body("guestName")
+      .optional()
+      .isString()
+      .withMessage("Guest name must be a string"),
+    body("roomNumber")
+      .optional()
+      .isInt({ min: 1 })
+      .withMessage("Room number must be a positive integer"),
+    body("requestDetails")
+      .optional()
+      .isString()
+      .withMessage("Request details must be a string"),
+    body("priority")
+      .optional()
+      .isInt({ min: 1 })
+      .withMessage("Priority must be a positive integer"),
+    body("status")
+      .optional()
+      .isIn([
+        "received",
+        "in progress",
+        "awaiting confirmation",
+        "completed",
+        "canceled",
+      ])
+      .withMessage("Invalid status value"),
+  ],
+  validate,
+  RequestController.updateRequest
+);
 
-// Route to delete a room service request
-router.delete('/requests/:id', RequestController.deleteRequest);
+router.delete(
+  "/requests/:id",
+  [param("id").isString()],
+  validate,
+  RequestController.deleteRequest
+);
 
-// Route to mark a room service request as completed
-router.post('/requests/:id/complete', RequestController.completeRequest);
+router.post(
+  "/requests/:id/complete",
+  [param("id").isString()],
+  validate,
+  RequestController.completeRequest
+);
 
 export default router;
