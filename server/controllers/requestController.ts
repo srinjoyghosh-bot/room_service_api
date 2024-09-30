@@ -49,9 +49,9 @@ export const getRequestById = (
     const { id } = req.params;
     const request = RequestService.getRequestById(id);
     if (request) {
-      res.json(request);
+      res.json(formatResponse(true,"Request fetched successfully",request));
     } else {
-      res.status(404).json(formatResponse(false, "Request not found"));
+      res.status(404).json(formatResponse(false, "Request not found for the id"));
     }
   } catch (error) {
     next(error);
@@ -89,7 +89,7 @@ export const deleteRequest = (
     const success = RequestService.deleteRequest(id);
     if (success) {
       res
-        .status(204)
+        .status(200)
         .json(formatResponse(true, "Request deleted successfully"));
     } else {
       res
