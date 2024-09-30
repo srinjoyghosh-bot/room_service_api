@@ -1,12 +1,29 @@
-import express from 'express';
-import requestRoutes from './routes/requestRoutes';
-import { errorHandler } from './middleware/errorMiddleware';
+import express, { Request, Response, NextFunction } from "express";
+import helmet from "helmet";
+import requestRoutes from "./routes/requestRoutes";
+import { errorHandler } from "./middleware/errorMiddleware";
 
 const app = express();
 
 app.use(express.json());
 
-app.use('/api', requestRoutes);
+app.use((req: Request, res: Response, next: NextFunction): void => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "OPTIONS, GET, POST, PUT, PATCH, DELETE"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") {
+    res.sendStatus(200);
+    return;
+  }
+  next();
+});
+
+app.use(helmet());
+
+app.use("/api", requestRoutes);
 
 app.use(errorHandler);
 
